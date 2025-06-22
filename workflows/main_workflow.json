@@ -1,0 +1,66 @@
+{
+  "name": "Bid and Grant Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 8,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "name": "Daily Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "requestMethod": "GET",
+        "url": "https://example.gov/api/opportunities",
+        "responseFormat": "json"
+      },
+      "name": "Fetch Opportunities",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "Summarize the opportunity and generate key proposal points." 
+      },
+      "name": "Analyze With OpenAI",
+      "type": "n8n-nodes-base.openai",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.gohighlevel.com/v1/leads",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"lead\": {\"name\": \"{{$json[\"title\"]}}\"}}"
+      },
+      "name": "Update CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Daily Trigger": {
+      "main": [ [ "Fetch Opportunities" ] ]
+    },
+    "Fetch Opportunities": {
+      "main": [ [ "Analyze With OpenAI" ] ]
+    },
+    "Analyze With OpenAI": {
+      "main": [ [ "Update CRM" ] ]
+    }
+  }
+}
