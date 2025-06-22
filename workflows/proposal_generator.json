@@ -1,0 +1,42 @@
+{
+  "name": "Proposal Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "return [{\"title\": $json.title, \"description\": $json.description}];"
+      },
+      "name": "Prepare Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "model": "claude-3",
+        "prompt": "Generate a detailed proposal for {{$json.title}} with requirements: {{$json.description}}"
+      },
+      "name": "Claude",
+      "type": "n8n-nodes-base.openai",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "Refine the proposal: {{$node.\"Claude\".json[\"text\"]}}"
+      },
+      "name": "OpenAI Refine",
+      "type": "n8n-nodes-base.openai",
+      "typeVersion": 1,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "Prepare Data": {
+      "main": [ [ "Claude" ] ]
+    },
+    "Claude": {
+      "main": [ [ "OpenAI Refine" ] ]
+    }
+  }
+}
